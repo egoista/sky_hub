@@ -6,24 +6,26 @@ class Image
 
   embeds_many :image_versions
 
-  def self.create_from_urls(urls, host)
+  def self.create_from_urls(urls)
     urls.each do |url|
-      file_name = url[/([^\/]+)\/?$/, 1]
-      unless self.where(file_name: file_name).exists?
+      unless self.where(source: url).exists?
+        source_file_name = url[/([^\/]+)\/?$/, 1]
         image = self.create(
-            file_name: file_name,
+            file_name: source_file_name,
             source: url,
         )
 
         CONFIG['image_dimensions'].each do |size_name, dimensions|
-          image_version = ImageVersion.create(
+          file_name = "#{size_name}_#{source_file_name}"
+          edited_image = ImageEdit.create_from_url(url).resize(dimensions['height'], dimensions['width'])
+          public_url = FileStorage.upload_public_file(file_name, edited_image.path)
+
+          ImageVersion.create(
               image: image,
               alias: size_name,
-              path: Rails.root.join(CONFIG['images_folder'],"#{size_name}_#{file_name}").to_s,
-              url: "#{host}/#{CONFIG['images_folder']}/#{size_name}_#{file_name}"
+              public_url: public_url
           )
 
-          ImageEdit.resize_from_url(url, dimensions['height'], dimensions['width'], image_version.path)
         end
 
         image.save
@@ -36,7 +38,7 @@ class Image
     self.all.each do |image|
       result[image.file_name] = Hash.new
       image.image_versions.each do |image_version|
-        result[image.file_name][image_version.alias] = image_version.url
+        result[image.file_name][image_version.alias] = image_version.public_url
       end
     end
 

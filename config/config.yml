@@ -1,6 +1,5 @@
 defaults: &defaults
   images_web_service_url: http://54.152.221.29/images.json
-  images_folder: public
   image_dimensions:
     small:
       height: 320

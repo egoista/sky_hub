@@ -14,6 +14,10 @@ gem 'mongoid', '~> 6.0.0'
 # Image manipulation. Require ImageMagick or GraphicsMagick command-line too. https://github.com/minimagick/minimagick
 gem 'mini_magick'
 
+gem 'aws-sdk'
+
+gem 'sucker_punch', '~> 2.0'
+
 # Http requests and stubs.
 gem 'typhoeus'
 
